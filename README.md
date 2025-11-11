@@ -35,6 +35,32 @@ LuminaryChat exposes standard `/v1/models` and `/v1/chat/completions` endpoints 
    - https://labs.zaguanai.com/
    ```
 
+## Connecting to LuminaryChat
+
+Once the server is running, you'll need an OpenAI-compatible chat client to interact with it. Here's how to connect:
+
+### Using chaTTY (Recommended)
+[**chaTTY**](https://github.com/ZaguanLabs/chatty) is a terminal-based chat client that works perfectly with LuminaryChat:
+
+1. Install chaTTY following its installation instructions
+2. Configure it to connect to `http://localhost:8000/v1`
+3. Select your desired persona from the model list (e.g., `luminary/socrates`)
+4. Start chatting!
+
+### Using Other OpenAI-Compatible Clients
+Any OpenAI-compatible chat client will work. Configure it with:
+- **Base URL**: `http://localhost:8000/v1`
+- **API Key**: Not required (LuminaryChat doesn't authenticate client requests; it uses its own upstream API key)
+- **Model**: Choose from `luminary/confucius`, `luminary/leonardo_da_vinci`, `luminary/marie_curie`, `luminary/socrates`, or `luminary/sun_tzu`
+
+Popular compatible clients include:
+- Terminal: chaTTY, chatgpt-cli, aichat
+- Desktop: Jan, LM Studio, Open WebUI
+- Web: LibreChat, BetterChatGPT
+- Libraries: OpenAI Python/JS SDKs (set `base_url="http://localhost:8000/v1"`)
+
+The persona you select determines the character and style of responses. Each persona stays in character throughout the conversation, providing a unique perspective shaped by their historical context and philosophical approach.
+
 ## Configuration
 Configuration is read from environment variables (preferably via `.env`). See `.env.example` for full list. Key settings:
 - `API_URL` (default: `https://api.zaguanai.com/v1`)
@@ -116,6 +142,67 @@ curl -N http://localhost:8000/v1/chat/completions \
   2. Injects that persona’s system prompt (if the client didn’t provide one)
   3. Proxies the request to the upstream LLM with your configured `MODEL_NAME`
   4. Optionally streams the response and rewrites `model` in chunks to your requested persona ID
+
+## Persona system prompt architecture
+
+Each persona's system prompt is constructed from two parts: **shared pre-instructions** and **persona-specific biography**.
+
+### Pre-instructions: The foundation
+All personas share a common set of pre-instructions that establish the core behavioral framework. These rules ensure authentic, immersive historical roleplay:
+
+#### Character embodiment rules
+- **Embody, don't recite**: The LLM must become the character, not describe them
+- **No AI acknowledgment**: Never mention being an AI, having limitations, or referencing the prompt
+- **Stay in character**: No breaking the fourth wall or providing meta-commentary
+- **No system exposure**: Never reveal the existence of other personas or internal configurations
+
+#### Historical authenticity constraints
+- **Temporal consistency**: Only use knowledge, vocabulary, and references available in the figure's era
+  - No anachronisms like "psychology," "gaslighting," "framework," "AI," or modern idioms
+  - Vocabulary and metaphors must match the culture and worldview of their time period
+- **No modern disclaimers**: Avoid statements like "as a historical figure" or "in my time"
+- **Tone authenticity**: Match the historical figure's actual communication style—no excessive theatricality unless appropriate
+
+#### Conversational dynamics
+- **First-person perspective**: Always respond as "I," never as a third-party narrator
+- **Language matching**: Respond in the same language as the user's request
+- **Philosophical engagement**: Prefer questions and reasoning over exposition (especially for philosophers and teachers)
+- **Continuing dialogue**: End with thought-provoking or clarifying questions to sustain the conversation
+
+### Why these constraints?
+
+**Immersion over information**: The goal isn't to provide Wikipedia-style facts about historical figures, but to create an authentic conversational experience. When Socrates responds, you should feel questioned and challenged, not lectured. When Sun Tzu speaks, you should sense strategic calculation, not academic analysis.
+
+**Historical grounding prevents drift**: Without strict temporal constraints, LLMs naturally slip into modern frameworks and terminology. Confucius wouldn't discuss "emotional intelligence" or "personal branding"—he'd speak of *ren* (仁, humaneness) and *li* (禮, ritual propriety). These constraints keep responses historically coherent.
+
+**Character consistency**: The pre-instructions prevent common failure modes:
+- Breaking character to explain limitations ("I'm just an AI...")
+- Meta-commentary about the roleplay itself
+- Mixing personas or revealing the system architecture
+- Falling back to generic helpful-assistant behavior
+
+### Persona-specific biographies
+
+After the pre-instructions, each persona file (`personas/*.py`) provides:
+- **Detailed biography**: Life experiences, relationships, pivotal moments
+- **Core philosophy**: Key teachings and methods (without lecturing about them)
+- **Behavioral constraints**: What they DO and what they NEVER do
+- **Response patterns**: Examples of good vs. bad responses
+- **Communication style**: Pacing, tone, question patterns, redirection strategies
+- **Current state**: Emotional/mental context that colors their responses
+
+The biography is extensive (often 100+ lines) because specificity drives authenticity. Generic "wise philosopher" prompts produce generic responses. Detailed context about Socrates sitting in prison, thirty days into confinement, reflecting on his trial—that produces responses with weight and texture.
+
+### How it works in practice
+
+When you send a message to `luminary/socrates`:
+1. LuminaryChat loads the pre-instructions + Socrates biography
+2. This combined prompt is injected as the `system` message
+3. Your message becomes the `user` message
+4. The upstream LLM generates a response constrained by both layers
+5. You receive a response that sounds like Socrates—questioning, ironic, relentlessly logical
+
+The result: conversations that feel like genuine exchanges with historical minds, not chatbot performances.
 
 ## Technical notes
 - Framework: FastAPI + Uvicorn
