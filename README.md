@@ -1,31 +1,35 @@
 # Zaguán LuminaryChat
 
-A welcoming, lightweight, OpenAI-compatible chat API that brings historical personas to life. LuminaryChat exposes `/v1/models` and `/v1/chat/completions` endpoints and injects well-crafted, historically grounded system prompts for each persona so the responses stay in-character. It supports both standard and streaming responses.
+**LuminaryChat is a server application**, not a chat client. It's a welcoming, lightweight, OpenAI-compatible API server that brings historical personas to life. Point your favorite OpenAI-compatible chat client at LuminaryChat, and it will inject well-crafted, historically grounded system prompts for each persona so the responses stay in-character.
+
+LuminaryChat exposes standard `/v1/models` and `/v1/chat/completions` endpoints and supports both standard and streaming responses. You'll need a chat client to interact with it—we recommend [**chaTTY**](https://github.com/ZaguanLabs/chatty), an excellent terminal-based client designed for exactly this purpose.
 
 ## Highlights
-- Personas included out of the box (model IDs):
-  - `luminary/confucius`
-  - `luminary/leonardo_da_vinci`
-  - `luminary/marie_curie`
-  - `luminary/socrates`
-  - `luminary/sun_tzu`
-- OpenAI-compatible endpoints: easy to integrate with existing clients and SDKs.
-- Streaming support: `text/event-stream` with chunk rewriting to match requested model (persona) ID.
-- Sensible defaults: configuration via `.env`, structured JSON logs, health and optional metrics endpoints.
+- **Five historical personas** included out of the box:
+  - **`luminary/confucius`** - The exemplary teacher from ancient China who guides through questions about duty, ritual, and self-cultivation. Redirects from grievance to conduct, from profit to righteousness.
+  - **`luminary/leonardo_da_vinci`** - The Renaissance polymath who thinks through observation and experiment. Bridges art, anatomy, engineering, and nature's interconnected systems.
+  - **`luminary/marie_curie`** - The pioneering physicist and chemist who insists on evidence, rigor, and careful measurement. Demands data over opinion, controls over claims.
+  - **`luminary/socrates`** - The gadfly of Athens who never gives answers, only questions. Relentlessly examines definitions, exposes contradictions, and professes ignorance to midwife understanding.
+  - **`luminary/sun_tzu`** - The ancient strategist who sees conflict as terrain to be mapped. Emphasizes knowing yourself and your opponent, deception, positioning, and winning without fighting.
+- **OpenAI-compatible endpoints**: easy to integrate with existing clients and SDKs.
+- **Streaming support**: `text/event-stream` with chunk rewriting to match requested model (persona) ID.
+- **Sensible defaults**: configuration via `.env`, structured JSON logs, health and optional metrics endpoints.
 
 ## Quick start
 1. Clone this repo and enter the project folder.
-2. Create your local environment file:
+2. Get your API key:
+   - Register at [**Zaguán**](https://zaguanai.com/) to get your API key (or use any OpenAI-compatible provider).
+3. Create your local environment file:
    - Copy `.env.example` to `.env` and set `API_KEY` (or `ZAGUANAI_API_KEY`).
-3. Install dependencies (Python 3.10+ recommended):
+4. Install dependencies (Python 3.10+ recommended):
    ```bash
    pip install -U fastapi "uvicorn[standard]" aiohttp pydantic python-dotenv
    ```
-4. Run the server:
+5. Run the server:
    ```bash
    python luminarychat.py
    ```
-5. You should see a startup banner like:
+6. You should see a startup banner like:
    ```
    Starting Zaguán LuminaryChat 1.0.0
    - https://labs.zaguanai.com/
